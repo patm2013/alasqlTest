@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>AlaSQL Test</title>
+	<script src="js/jquery.min.js"></script>
+	<script src='js/xlsx.core.min.js'></script>
+	<script src="js/alasql.min.js"></script>
+	<script src="js/underscore.min.js"></script>
+</head>
+<body>
+	
+	<p>Select CSV file to read:</p>
+    <input id="readfile" type="file" onchange="loadFile(event)"/>
+    <hr>
+    <table>
+    	<thead>
+    		<tr>
+	    		<th>First Name</th>
+	    		<th>Last Name</th>
+    		</tr>
+    	</thead>
+    	<tbody id="tableBody">
+    		
+    	</tbody>
+    </table>
+	<script>
+		function loadFile(event) {
+            alasql('SELECT * FROM FILE(?,{headers:true})',[event],function(data){
+                // Process data here
+                createTable(data);
+            });
+         }
+
+         function createTable(arrData) {
+         	_.each(arrData, function(d){
+         		console.log(d.firstName);
+         		$("#tableBody").append("<tr><td>" + d.firstName + "</td><td>" + d.lastName + "</td></tr>");
+         	});
+         }
+	</script>
+</body>
+</html>
