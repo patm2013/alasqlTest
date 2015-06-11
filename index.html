@@ -24,12 +24,18 @@
         </div>
         <hr>
         <div class="row" id="qry">
-            <div class="columns twelve">
+            <div class="columns eight">
                 <h5>2. Write a SQL Query</h5>
                 <form action="" id="frmSQL">
-                    <input class="u-full-width" type="text" id="sql">
+                    <label for="qryName">Name</label>
+                    <input name="qryName" class="u-full-width" type="text" id="sqlName">
+                    <label for="sqlQry">SQL</label>
+                    <input name="sqlQry" class="u-full-width" type="text" id="sqlQry">
                     <button class="button-primary" type="submit">Go</button>
                 </form>
+            </div>
+            <div id="qrys" class="columns four">
+                
             </div>
         </div>
         <hr>
@@ -95,11 +101,11 @@
          	var tmpArr = [];
          	_.each(data, function(d){
          		var tmpString = '';
-         		tmpString = "<tr>"
+         		tmpString = "<tr>";
          		for (var prop in d) {
          			tmpString += "<td>" + d[prop] + "</td>";
          		}
-         		tmpString += "</tr>"
+         		tmpString += "</tr>";
          		tmpArr.push(tmpString);
          	});
          	_.each(tmpArr, function(row){
@@ -110,13 +116,22 @@
          //QUERY - get form value
         $("#frmSQL").on('submit', function(e){
             e.preventDefault();
-            queryTable($("#sql").val());
+            strQry = $("#sqlQry").val();
+            queryTable(strQry);
+
+            //create qry button
+            $("#qrys").append('<button class="qryBtn" data-qry="' + strQry + '">' + $("#sqlName").val() + '</button>');
         });
         //QUERY - run query from form value and create table
         function queryTable(qryString) {
             htmlTable(alasql(qryString));
          }
 
+         //Multiple Query Buttons
+         $(document).on('click', ".qryBtn", function(e){
+            e.preventDefault();
+            queryTable($(this).attr("data-qry"));
+         });
          
 	</script>
 </body>
