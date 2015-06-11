@@ -3,40 +3,109 @@
 <head>
 	<meta charset="UTF-8">
 	<title>AlaSQL Test</title>
+    <!-- <link href='http://fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css'> -->
+
 	<script src="js/jquery.min.js"></script>
 	<script src='js/xlsx.core.min.js'></script>
 	<script src="js/alasql.min.js"></script>
 	<script src="js/underscore.min.js"></script>
+
+    <link rel="stylesheet" href="css/normalize.css">
+    <link rel="stylesheet" href="css/skeleton.css">
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+	<div class="container" style="padding-top: 50px">
+        <div class="row">
+            <div class="columns four">
+                <h5>1. Select an Excel File:</h5>
+                <input id="readfile" type="file" onchange="loadFile(event)"/>
+                <hr>
+                <form action="" id="frmSQL">
+                    <input type="text" id="sql">
+                    <button type="submit">Go</button>
+                </form>
+            </div>
+            <div class="columns eight">
+                <table class="u-full-width" id="dataTable">
+                    <thead id="tableHeader">
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 	
-	<p>Select CSV file to read:</p>
-    <input id="readfile" type="file" onchange="loadFile(event)"/>
-    <hr>
-    <table>
-    	<thead>
-    		<tr>
-	    		<th>First Name</th>
-	    		<th>Last Name</th>
-    		</tr>
-    	</thead>
-    	<tbody id="tableBody">
-    		
-    	</tbody>
-    </table>
+
+    
 	<script>
+
+		$("#frmSQL").on('submit', function(e){
+			e.preventDefault();
+            queryTable($("#sql").val());
+		});
 		function loadFile(event) {
-            alasql('SELECT * FROM FILE(?,{headers:true})',[event],function(data){
+			alasql("CREATE TABLE names (firstName string, lastName string)");
+            alasql('SELECT firstName, lastName FROM FILE(?,{headers:true})',[event],function(data){
                 // Process data here
                 createTable(data);
             });
          }
 
          function createTable(arrData) {
+         	//Clear Table
+            $("#tableBody").html('');
+
+            //Create Initial Table
          	_.each(arrData, function(d){
          		console.log(d.firstName);
-         		$("#tableBody").append("<tr><td>" + d.firstName + "</td><td>" + d.lastName + "</td></tr>");
+         		insertNames(d.firstName, d.lastName);
          	});
+         	htmlTable(arrData);
+         }
+
+         function insertNames(fName, lName) {
+         	alasql('INSERT INTO names VALUES("' + fName + '","' + lName + '")');
+         }
+
+         function htmlTable(data) {
+         	//Clear Table
+         	$("#tableHeader").html('');
+            $("#tableBody").html('');
+
+            //Create Headers
+         	var arrHeaders = _.keys(data[0]);
+         	var tmpHeaders = "<tr>";
+         	_.each(arrHeaders, function(header){
+         		tmpHeaders += "<th>" + header + "</th>";
+         	});
+         	tmpHeaders += "</tr>";
+         	$("#tableHeader").append(tmpHeaders);
+
+         	//Create Body
+         	var tmpArr = [];
+         	_.each(data, function(d){
+         		var tmpString = '';
+         		tmpString = "<tr>"
+         		for (var prop in d) {
+         			tmpString += "<td>" + d[prop] + "</td>";
+         		}
+         		tmpString += "</tr>"
+         		tmpArr.push(tmpString);
+         	});
+         	_.each(tmpArr, function(row){
+         		$("#tableBody").append(row);
+         	});
+         }
+
+         function queryTable(qryString) {
+            htmlTable(alasql(qryString));
          }
 	</script>
 </body>
