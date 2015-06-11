@@ -60,7 +60,7 @@
             //scroll to Query Section
             $("html, body").animate({scrollTop: $("#qry").offset().top-35}, 2000);
 
-            //Create Ala Table
+            //Load data and send it to the create table function
             alasql('SELECT * FROM FILE(?,{headers:true})',[event],function(data){
                 // Process data here
                 createTable(data, tableName);
