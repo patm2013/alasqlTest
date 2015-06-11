@@ -52,17 +52,15 @@
     
 	<script>
 
-		$("#frmSQL").on('submit', function(e){
-			e.preventDefault();
-            queryTable($("#sql").val());
-		});
 		function loadFile(event) {
             //set table name
             var tableName = "users";
             $("#tableName").text(tableName);
-			//alasql("CREATE TABLE names (firstName string, lastName string)");
+
+            //scroll to Query Section
             $("html, body").animate({scrollTop: $("#qry").offset().top-35}, 2000);
 
+            //Create Ala Table
             alasql('SELECT * FROM FILE(?,{headers:true})',[event],function(data){
                 // Process data here
                 createTable(data, tableName);
@@ -76,20 +74,6 @@
             var strPTbl = "SELECT * INTO " + strName + " FROM ?";
             alasql(strPTbl, [arrData]);
          	htmlTable(arrData);
-         }
-
-         // function iterData(arrRows){
-         //    var arrTmp = [];
-         //    _.each(arrRows, function(d){
-         //        var tmpStr = '';
-         //        for (var prop in d) {
-         //            tmpStr += 
-         //        }
-         //    });
-         // }
-
-         function insertNames(fName, lName) {
-         	alasql('INSERT INTO names VALUES("' + fName + '","' + lName + '")');
          }
 
          //Create HTML Table
@@ -123,9 +107,17 @@
          	});
          }
 
-         function queryTable(qryString) {
+         //QUERY - get form value
+        $("#frmSQL").on('submit', function(e){
+            e.preventDefault();
+            queryTable($("#sql").val());
+        });
+        //QUERY - run query from form value and create table
+        function queryTable(qryString) {
             htmlTable(alasql(qryString));
          }
+
+         
 	</script>
 </body>
 </html>
