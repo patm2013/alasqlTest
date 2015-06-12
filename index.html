@@ -120,7 +120,12 @@
             queryTable(strQry);
 
             //create qry button
-            $("#qrys").append('<button class="qryBtn" data-qry="' + strQry + '">' + $("#sqlName").val() + '</button>');
+            var tmpBtn = $("<button>", {
+                text: $("#sqlName").val(),
+                'data-qry': strQry,
+                'class': "qryBtn"
+            });
+            $("#qrys").append(tmpBtn);
         });
         //QUERY - run query from form value and create table
         function queryTable(qryString) {
