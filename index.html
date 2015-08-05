@@ -15,11 +15,20 @@
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-	<div class="container" style="padding-top: 50px">
-        <div class="row">
+	<div class="container">
+<div class="row">
+        <div class="columns twelve">
+            <h2>Alasql Query Interface</h2>
+            <hr>
+        </div>
+    </div>
+
+      <div class="row">
             <div class="columns twelve">
                 <h5>1. Select an Excel File:</h5>
+
                 <input id="readfile" type="file" onchange="loadFile(event)"/>
+                <a href="MOCK_DATA.xslx" class="button" id="btnDefault">Download An Example .xlsx</a>
             </div>
         </div>
         <hr>
@@ -28,10 +37,11 @@
                 <h5>2. Write a SQL Query</h5>
                 <form action="" id="frmSQL">
                     <label for="qryName">Name</label>
-                    <input name="qryName" class="u-full-width" type="text" id="sqlName">
+                    <input disabled name="qryName" placeholder="select an excel file first" class="u-full-width" type="text" id="sqlName">
                     <label for="sqlQry">SQL</label>
-                    <input name="sqlQry" class="u-full-width" type="text" id="sqlQry">
-                    <button class="button-primary" type="submit">Go</button>
+                    <input disabled name="sqlQry" placeholder="select an excel file first" class="u-full-width" type="text" id="sqlQry">
+                    <button class="button-primary frmSubmit" type="submit">Go</button>
+                    <span class="button frmClear">Clear</span>
                 </form>
             </div>
             <div id="qrys" class="columns four">
@@ -54,11 +64,9 @@
         </div>
     </div>
 	
+    <script>
 
-    
-	<script>
-
-		function loadFile(event) {
+        function loadFile(event) {
             //set table name
             var tableName = "users";
             $("#tableName").text(tableName);
@@ -68,49 +76,61 @@
 
             //Load data and send it to the create table function
             alasql('SELECT * FROM FILE(?,{headers:true})',[event],function(data){
+                console.log(data);
                 // Process data here
                 createTable(data, tableName);
+                appendInitialQry(tableName);
             });
+         }
+
+         function appendInitialQry(tblName){
+            //create qry button
+            var tmpBtn = $("<button>", {
+                text: "Select All",
+                'data-qry': "SELECT * FROM " + tblName,
+                'class': "qryBtn"
+            });
+            $("#qrys").append(tmpBtn);
+            $("#sqlName").val("Select All").prop('disabled', false).prop('placeholder','Query Name');
+            $("#sqlQry").val("SELECT * FROM " + tblName).prop('disabled', false).prop('placeholder','SQL Statement');
          }
 
          //Create ala table
          function createTable(arrData, strName) {
-            var strCTbl = "CREATE TABLE " + strName;
-            alasql(strCTbl);
-            var strPTbl = "SELECT * INTO " + strName + " FROM ?";
-            alasql(strPTbl, [arrData]);
-         	htmlTable(arrData);
+            alasql("CREATE TABLE " + strName);
+            alasql("SELECT * INTO " + strName + " FROM ?", [arrData]);
+            htmlTable(arrData);
          }
 
          //Create HTML Table
          function htmlTable(data) {
-         	//Clear Table
-         	$("#tableHeader").html('');
+            //Clear Table
+            $("#tableHeader").html('');
             $("#tableBody").html('');
 
             //Create Headers
-         	var arrHeaders = _.keys(data[0]);
-         	var tmpHeaders = "<tr>";
-         	_.each(arrHeaders, function(header){
-         		tmpHeaders += "<th>" + header + "</th>";
-         	});
-         	tmpHeaders += "</tr>";
-         	$("#tableHeader").append(tmpHeaders);
+            var arrHeaders = _.keys(data[0]);
+            var tmpHeaders = "<tr>";
+            _.each(arrHeaders, function(header){
+                tmpHeaders += "<th>" + header + "</th>";
+            });
+            tmpHeaders += "</tr>";
+            $("#tableHeader").append(tmpHeaders);
 
-         	//Create Body
-         	var tmpArr = [];
-         	_.each(data, function(d){
-         		var tmpString = '';
-         		tmpString = "<tr>";
-         		for (var prop in d) {
-         			tmpString += "<td>" + d[prop] + "</td>";
-         		}
-         		tmpString += "</tr>";
-         		tmpArr.push(tmpString);
-         	});
-         	_.each(tmpArr, function(row){
-         		$("#tableBody").append(row);
-         	});
+            //Create Body
+            var tmpArr = [];
+            _.each(data, function(d){
+                var tmpString = '';
+                tmpString = "<tr>";
+                for (var prop in d) {
+                    tmpString += "<td>" + d[prop] + "</td>";
+                }
+                tmpString += "</tr>";
+                tmpArr.push(tmpString);
+            });
+            _.each(tmpArr, function(row){
+                $("#tableBody").append(row);
+            });
          }
 
          //QUERY - get form value
@@ -127,17 +147,26 @@
             });
             $("#qrys").append(tmpBtn);
         });
+
+        $(".frmClear").on('click', function(e){
+            e.preventDefault();
+            $("#sqlQry").val('')
+            $("#sqlName").val('');
+        })
         //QUERY - run query from form value and create table
         function queryTable(qryString) {
+            console.log(alasql(qryString));
             htmlTable(alasql(qryString));
          }
 
          //Multiple Query Buttons
          $(document).on('click', ".qryBtn", function(e){
             e.preventDefault();
-            queryTable($(this).attr("data-qry"));
+            queryTable($(this).attr("data-qry"))
+            $("#sqlQry").val($(this).attr("data-qry"))
+            $("#sqlName").val($(this).text());
          });
          
-	</script>
+    </script>
 </body>
 </html>
